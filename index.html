@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogging Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .post-card {
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+            height: 100%;
+        }
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .post-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .post-excerpt {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        .post-meta {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-right: 5px;
+            color: #495057;
+        }
+        .comment {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .comment-author {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .comment-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .comment-content {
+            margin-top: 5px;
+        }
+        #post-content-display {
+            line-height: 1.6;
+        }
+        #post-content-display img {
+            max-width: 100%;
+            height: auto;
+        }
+        @media (max-width: 768px) {
+            .navbar-collapse {
+                margin-top: 10px;
+            }
+            .d-flex {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Frontend HTML -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Blog Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="home-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="create-post-link">Create Post</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <input class="form-control me-2" type="search" id="search-input" placeholder="Search posts...">
+                    <button class="btn btn-outline-light" id="search-btn">Search</button>
+                </div>
+                <ul class="navbar-nav ms-3" id="auth-links">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="login-link">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="register-link">Register</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-3 d-none" id="user-links">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="user-dropdown" role="button" data-bs-toggle="dropdown">
+                            <span id="username-display"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="my-posts-link">My Posts</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4" id="main-content">
+        <div id="posts-container" class="row"></div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="login-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="register-form">
+                        <div class="mb-3">
+                            <label for="register-username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="register-username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="register-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="register-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-confirm-password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="register-confirm-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createPostModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-post-form">
+                        <div class="mb-3">
+                            <label for="post-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="post-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="post-content" class="form-label">Content</label>
+                            <textarea class="form-control" id="post-content" rows="10" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="post-tags" class="form-label">Tags (comma separated)</label>
+                            <input type="text" class="form-control" id="post-tags">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Publish</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="postModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="post-modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <small class="text-muted" id="post-author"></small>
+                        <small class="text-muted" id="post-date"></small>
+                    </div>
+                    <div id="post-content-display" class="mb-4"></div>
+                    <div id="post-tags-display" class="mb-4"></div>
+                    <hr>
+                    <h5>Comments</h5>
+                    <div id="comments-container" class="mb-4"></div>
+                    <form id="add-comment-form" class="mt-3">
+                        <div class="mb-3">
+                            <textarea class="form-control" id="comment-content" placeholder="Add a comment..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Post Comment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Backend Simulation (would normally be in a separate Node.js server)
+        class BackendSimulator {
+            constructor() {
+                this.users = [];
+                this.posts = [];
+                this.comments = [];
+                this.currentUser = null;
+            }
+
+            // User Authentication
+            register(username, email, password) {
+                if (this.users.some(u => u.email === email)) {
+                    throw new Error('User already exists');
+                }
+
+                const user = {
+                    id: Date.now().toString(),
+                    username,
+                    email,
+                    password, // In a real app, you would hash this
+                    createdAt: new Date()
+                };
+
+                this.users.push(user);
+                return user;
+            }
+
+            login(email, password) {
+                const user = this.users.find(u => u.email === email && u.password === password);
+                if (!user) throw new Error('Invalid credentials');
+                return user;
+            }
+
+            // Blog Posts
+            createPost(title, content, authorId, tags = []) {
+                const post = {
+                    id: Date.now().toString(),
+                    title,
+                    content,
+                    author: this.users.find(u => u.id === authorId),
+                    tags,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+
+                this.posts.push(post);
+                return post;
+            }
+
+            getPosts() {
+                return this.posts.map(post => ({
+                    ...post,
+                    author: { _id: post.author.id, username: post.author.username }
+                }));
+            }
+
+            getPostById(id) {
+                const post = this.posts.find(p => p.id === id);
+                if (!post) throw new Error('Post not found');
+                return {
+                    ...post,
+                    author: { _id: post.author.id, username: post.author.username }
+                };
+            }
+
+            searchPosts(query) {
+                const lowerQuery = query.toLowerCase();
+                return this.posts.filter(post =>
+                    post.title.toLowerCase().includes(lowerQuery) ||
+                    post.content.toLowerCase().includes(lowerQuery) ||
+                    post.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+                ).map(post => ({
+                    ...post,
+                    author: { _id: post.author.id, username: post.author.username }
+                }));
+            }
+
+            // Comments
+            addComment(content, authorId, postId) {
+                const comment = {
+                    id: Date.now().toString(),
+                    content,
+                    author: this.users.find(u => u.id === authorId),
+                    postId,
+                    createdAt: new Date()
+                };
+
+                this.comments.push(comment);
+                return comment;
+            }
+
+            getCommentsForPost(postId) {
+                return this.comments
+                    .filter(c => c.postId === postId)
+                    .map(comment => ({
+                        ...comment,
+                        author: { _id: comment.author.id, username: comment.author.username }
+                    }));
+            }
+        }
+
+        // Frontend Application
+        class BlogApp {
+            constructor() {
+                this.backend = new BackendSimulator();
+                this.currentUser = null;
+                this.currentPostId = null;
+
+                // Initialize the app
+                this.initAuth();
+                this.initPosts();
+                this.initComments();
+                this.loadPosts();
+            }
+
+            // Authentication Methods
+            initAuth() {
+                // DOM Elements
+                this.loginLink = document.getElementById('login-link');
+                this.registerLink = document.getElementById('register-link');
+                this.logoutLink = document.getElementById('logout-link');
+                this.authLinks = document.getElementById('auth-links');
+                this.userLinks = document.getElementById('user-links');
+                this.usernameDisplay = document.getElementById('username-display');
+
+                // Modals
+                this.loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                this.registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+
+                // Forms
+                this.loginForm = document.getElementById('login-form');
+                this.registerForm = document.getElementById('register-form');
+
+                // Event Listeners
+                this.loginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.loginModal.show();
+                });
+
+                this.registerLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.registerModal.show();
+                });
+
+                this.logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.logout();
+                });
+
+                this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+                this.registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+            }
+
+            checkAuth() {
+                // In a real app, this would check localStorage for a token
+                return this.currentUser !== null;
+            }
+
+            updateAuthUI() {
+                if (this.currentUser) {
+                    this.authLinks.classList.add('d-none');
+                    this.userLinks.classList.remove('d-none');
+                    this.usernameDisplay.textContent = this.currentUser.username;
+                } else {
+                    this.authLinks.classList.remove('d-none');
+                    this.userLinks.classList.add('d-none');
+                    this.usernameDisplay.textContent = '';
+                }
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                try {
+                    const user = this.backend.login(email, password);
+                    this.currentUser = user;
+                    this.loginModal.hide();
+                    this.loginForm.reset();
+                    this.updateAuthUI();
+                    this.loadPosts();
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+
+            async handleRegister(e) {
+                e.preventDefault();
+
+                const username = document.getElementById('register-username').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+
+                try {
+                    const user = this.backend.register(username, email, password);
+                    this.currentUser = user;
+                    this.registerModal.hide();
+                    this.registerForm.reset();
+                    this.updateAuthUI();
+                    this.loadPosts();
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+
+            logout() {
+                this.currentUser = null;
+                this.updateAuthUI();
+                this.loadPosts();
+            }
+
+            // Post Methods
+            initPosts() {
+                this.postsContainer = document.getElementById('posts-container');
+                this.createPostLink = document.getElementById('create-post-link');
+                this.createPostModal = new bootstrap.Modal(document.getElementById('createPostModal'));
+                this.createPostForm = document.getElementById('create-post-form');
+                this.postModal = new bootstrap.Modal(document.getElementById('postModal'));
+                this.searchInput = document.getElementById('search-input');
+                this.searchBtn = document.getElementById('search-btn');
+                this.homeLink = document.getElementById('home-link');
+                this.myPostsLink = document.getElementById('my-posts-link');
+
+                // Event Listeners
+                this.createPostLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.checkAuth()) {
+                        this.createPostModal.show();
+                    } else {
+                        alert('Please login to create a post');
+                    }
+                });
+
+                this.createPostForm.addEventListener('submit', (e) => this.handleCreatePost(e));
+                this.searchBtn.addEventListener('click', () => this.handleSearch());
+                this.searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleSearch();
+                    }
+                });
+                this.homeLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.loadPosts();
+                });
+                this.myPostsLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.checkAuth()) {
+                        this.loadMyPosts();
+                    } else {
+                        alert('Please login to view your posts');
+                    }
+                });
+            }
+
+            loadPosts() {
+                try {
+                    const posts = this.backend.getPosts();
+                    this.renderPosts(posts);
+                } catch (err) {
+                    console.error('Error loading posts:', err);
+                    this.postsContainer.innerHTML = '<div class="col-12"><div class="alert alert-danger">Failed to load posts</div></div>';
+                }
+            }
+
+            loadMyPosts() {
+                try {
+                    const allPosts = this.backend.getPosts();
+                    const myPosts = allPosts.filter(post => post.author._id === this.currentUser.id);
+                    this.renderPosts(myPosts);
+                } catch (err) {
+                    console.error('Error loading my posts:', err);
+                    this.postsContainer.innerHTML = '<div class="col-12"><div class="alert alert-danger">Failed to load your posts</div></div>';
+                }
+            }
+
+            handleSearch() {
+                const query = this.searchInput.value.trim();
+                if (!query) {
+                    this.loadPosts();
+                    return;
+                }
+
+                try {
+                    const posts = this.backend.searchPosts(query);
+                    this.renderPosts(posts);
+                } catch (err) {
+                    console.error('Error searching posts:', err);
+                    this.postsContainer.innerHTML = '<div class="col-12"><div class="alert alert-danger">Search failed</div></div>';
+                }
+            }
+
+            renderPosts(posts) {
+                if (posts.length === 0) {
+                    this.postsContainer.innerHTML = '<div class="col-12"><div class="alert alert-info">No posts found</div></div>';
+                    return;
+                }
+
+                this.postsContainer.innerHTML = '';
+
+                posts.forEach(post => {
+                    const postCard = document.createElement('div');
+                    postCard.className = 'col-md-6 col-lg-4';
+                    postCard.innerHTML = `
+                        <div class="card post-card">
+                            <div class="card-body">
+                                <h5 class="post-title">${post.title}</h5>
+                                <p class="post-excerpt">${post.content.substring(0, 100)}${post.content.length > 100 ? '...' : ''}</p>
+                                <div class="post-meta d-flex justify-content-between">
+                                    <span>By ${post.author.username}</span>
+                                    <span>${new Date(post.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                ${post.tags && post.tags.length > 0 ?
+                                    `<div class="mt-2">${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>` : ''}
+                                <button class="btn btn-sm btn-primary mt-3 view-post-btn" data-id="${post.id}">Read More</button>
+                            </div>
+                        </div>
+                    `;
+                    this.postsContainer.appendChild(postCard);
+                });
+
+                // Add event listeners to view post buttons
+                document.querySelectorAll('.view-post-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const postId = e.target.getAttribute('data-id');
+                        this.viewPost(postId);
+                    });
+                });
+            }
+
+            viewPost(postId) {
+                try {
+                    const post = this.backend.getPostById(postId);
+                    this.currentPostId = postId;
+
+                    // Update modal content
+                    document.getElementById('post-modal-title').textContent = post.title;
+                    document.getElementById('post-content-display').innerHTML = post.content.replace(/\n/g, '<br>');
+                    document.getElementById('post-author').textContent = `By ${post.author.username}`;
+                    document.getElementById('post-date').textContent = new Date(post.createdAt).toLocaleString();
+
+                    const tagsDisplay = document.getElementById('post-tags-display');
+                    tagsDisplay.innerHTML = post.tags && post.tags.length > 0 ?
+                        `<strong>Tags:</strong> ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}` : '';
+
+                    // Load comments
+                    this.loadComments(postId);
+
+                    // Show modal
+                    this.postModal.show();
+                } catch (err) {
+                    console.error('Error viewing post:', err);
+                    alert('Failed to load post');
+                }
+            }
+
+            handleCreatePost(e) {
+                e.preventDefault();
+
+                const title = document.getElementById('post-title').value;
+                const content = document.getElementById('post-content').value;
+                const tags = document.getElementById('post-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+
+                try {
+                    const post = this.backend.createPost(title, content, this.currentUser.id, tags);
+                    this.createPostModal.hide();
+                    this.createPostForm.reset();
+                    this.loadPosts();
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+
+            // Comment Methods
+            initComments() {
+                this.commentsContainer = document.getElementById('comments-container');
+                this.addCommentForm = document.getElementById('add-comment-form');
+
+                // Event Listeners
+                this.addCommentForm.addEventListener('submit', (e) => this.handleAddComment(e));
+            }
+
+            loadComments(postId) {
+                try {
+                    const comments = this.backend.getCommentsForPost(postId);
+                    this.renderComments(comments);
+                } catch (err) {
+                    console.error('Error loading comments:', err);
+                    this.commentsContainer.innerHTML = '<div class="alert alert-danger">Failed to load comments</div>';
+                }
+            }
+
+            renderComments(comments) {
+                if (comments.length === 0) {
+                    this.commentsContainer.innerHTML = '<div class="alert alert-info">No comments yet</div>';
+                    return;
+                }
+
+                this.commentsContainer.innerHTML = '';
+
+                comments.forEach(comment => {
+                    const commentDiv = document.createElement('div');
+                    commentDiv.className = 'comment';
+                    commentDiv.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <span class="comment-author">${comment.author.username}</span>
+                            <span class="comment-date">${new Date(comment.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div class="comment-content">${comment.content}</div>
+                        ${this.currentUser && comment.author._id === this.currentUser.id ?
+                            `<button class="btn btn-sm btn-danger delete-comment-btn" data-id="${comment.id}">Delete</button>` : ''}
+                    `;
+                    this.commentsContainer.appendChild(commentDiv);
+
+                    // Add event listener to delete button if it exists
+                    const deleteBtn = commentDiv.querySelector('.delete-comment-btn');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.deleteComment(comment.id);
+                        });
+                    }
+                });
+            }
+
+            handleAddComment(e) {
+                e.preventDefault();
+
+                if (!this.checkAuth()) {
+                    alert('Please login to add a comment');
+                    return;
+                }
+
+                const content = document.getElementById('comment-content').value;
+
+                try {
+                    const comment = this.backend.addComment(content, this.currentUser.id, this.currentPostId);
+                    document.getElementById('comment-content').value = '';
+                    this.loadComments(this.currentPostId);
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+
+            deleteComment(commentId) {
+                if (!confirm('Are you sure you want to delete this comment?')) {
+                    return;
+                }
+
+                try {
+                    // In a real app, this would call a backend API to delete the comment
+                    const commentIndex = this.backend.comments.findIndex(c => c.id === commentId);
+                    if (commentIndex !== -1) {
+                        this.backend.comments.splice(commentIndex, 1);
+                    }
+                    this.loadComments(this.currentPostId);
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+        }
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new BlogApp();
+
+            // Add some sample data
+            const backend = app.backend;
+            backend.register('admin', 'admin@example.com', 'password');
+            backend.login('admin@example.com', 'password');
+
+            const post1 = backend.createPost(
+                'Welcome to the Blog Platform',
+                'This is a simple blogging platform created with HTML, CSS, and JavaScript. It simulates a backend with a Node.js-like interface.\n\nYou can create posts, add comments, and search for content.',
+                backend.currentUser.id,
+                ['welcome', 'introduction']
+            );
+
+            const post2 = backend.createPost(
+                'How to Use This Platform',
+                '1. Register an account\n2. Login\n3. Create posts\n4. Comment on posts\n5. Search for content',
+                backend.currentUser.id,
+                ['tutorial', 'guide']
+            );
+
+            backend.addComment('This is a great platform!', backend.currentUser.id, post1.id);
+            backend.addComment('Thanks for the tutorial', backend.currentUser.id, post2.id);
+
+            // Logout to start fresh
+            app.logout();
+        });
+    </script>
+</body>
+</html>
